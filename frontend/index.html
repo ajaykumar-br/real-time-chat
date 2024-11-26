@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        const ws = new WebSocket("ws://localhost:8080", "echo-protocol");
+        ws.onopen = () => {
+            ws.send(JSON.stringify({
+                type: "JOIN_ROOM",
+                payload: {
+                    name: "ajay",
+                    userId: "1",
+                    roomId: "2"
+                }
+            }))
+        }
+
+        function sendChat() {
+            ws.send(JSON.stringify({
+                type: "SEND_MESSAGE",
+                payload: {
+                    message: "Hi there!",
+                    userId: "1",
+                    roomId: "2"
+                }
+            }))
+        }
+    </script>
+
+    hello
+    <input type="text">
+    <br>
+    <button onclick="sendChat()">send</button>
+</body>
+</html>

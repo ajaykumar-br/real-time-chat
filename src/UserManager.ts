@@ -55,6 +55,7 @@ export class UserManager {
       return;
     }
     room.users.forEach(({conn}) => {
+      console.log("outgoing message: " + JSON.stringify(message));
       conn.sendUTF(JSON.stringify(message))
     });
   }

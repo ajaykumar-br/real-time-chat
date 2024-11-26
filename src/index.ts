@@ -28,6 +28,7 @@ function originIsAllowed(origin: string) {
 }
 
 wsServer.on("request", function (request) {
+  console.log("inside request");
   if (!originIsAllowed(request.origin)) {
     request.reject();
     console.log(
@@ -44,10 +45,8 @@ wsServer.on("request", function (request) {
         try {
             messageHandler(connection, JSON.parse(message.utf8Data));
         } catch (e) {
-            
+            console.error("Check message type");
         }
-    //   console.log("Received Message: " + message.utf8Data);
-    //   connection.sendUTF(message.utf8Data);
     }
   });
 
@@ -63,7 +62,7 @@ function messageHandler(ws: connection, message: IncomingMessage) {
       const payload = message.payload;
       userManager.addUser(payload.name, payload.userId, payload.roomId, ws);
     }
-
+    
     if(message.type == SupportedMessage.SendMessage) {
       const payload = message.payload;
       const user = userManager.getUser(payload.roomId, payload.userId);
@@ -73,8 +72,9 @@ function messageHandler(ws: connection, message: IncomingMessage) {
       }
       let chat = store.addChat(payload.userId, user.name, payload.roomId, payload.message);
       if(!chat) {
-        return ;
+        return;
       }
+
       // Todo add broadcast logic here
       const outgoingPayload = {
         type: OutgoingSupportedMessages.AddChat,
