@@ -26,6 +26,9 @@ export class UserManager {
       id: userId,
       conn: socket,
     });
+    socket.on('close', (reasonCode, description) => {
+      this.removeUser(roomId, userId);
+    })
   }
 
   getUser(roomId: string, userId: string): User | null {
@@ -34,6 +37,7 @@ export class UserManager {
   }
 
   removeUser(roomId: string, userId: string) {
+    console.log("user removed");
     const users = this.rooms.get(roomId)?.users;
     if (users) {
       users.filter(({ id }) => {

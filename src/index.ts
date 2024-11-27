@@ -3,7 +3,7 @@ import { createServer } from "http";
 import { UserManager } from "./UserManager";
 import { IncomingMessage, SupportedMessage } from "./messages/incomingMessages";
 import { SupportedMessage as OutgoingSupportedMessages, OutgoingMessage } from "./messages/outgoingMessages";
-import { InMemoryStore } from "./InMemoryStore";
+import { InMemoryStore } from "./store/InMemoryStore";
 
 const server = createServer(function (request, response) {
   console.log(new Date() + " Received request for " + request.url);
@@ -28,7 +28,6 @@ function originIsAllowed(origin: string) {
 }
 
 wsServer.on("request", function (request) {
-  console.log("inside request");
   if (!originIsAllowed(request.origin)) {
     request.reject();
     console.log(
@@ -41,6 +40,7 @@ wsServer.on("request", function (request) {
   console.log(new Date() + " Connection accepted.");
   connection.on("message", function (message) {
     // todo add rate limiting logic
+    
     if (message.type === "utf8") {
         try {
             messageHandler(connection, JSON.parse(message.utf8Data));
@@ -48,12 +48,6 @@ wsServer.on("request", function (request) {
             console.error("Check message type");
         }
     }
-  });
-
-  connection.on("close", function (reasonCode, description) {
-    console.log(
-      new Date() + " Peer " + connection.remoteAddress + " disconnected."
-    );
   });
 });
 
@@ -70,7 +64,7 @@ function messageHandler(ws: connection, message: IncomingMessage) {
         console.error("User not found in the db");
         return;
       }
-      let chat = store.addChat(payload.userId, user.name, payload.roomId, payload.message);
+      let chat = store.addChat(payload.userId, payload.roomId, user.name, payload.message);
       if(!chat) {
         return;
       }
@@ -105,6 +99,7 @@ function messageHandler(ws: connection, message: IncomingMessage) {
           upvotes: chat.upvotes.length,
         },
       };
+      console.log("inside upvote 3");
       userManager.broadcast(payload.roomId, payload.userId, outgoingPayload);
     }
 }
